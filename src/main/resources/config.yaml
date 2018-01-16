@@ -1,0 +1,66 @@
+kumuluzee:
+  name: recommendation-service
+  env:
+    name: dev
+  version: 1.0.0
+  server:
+    base-url: http://localhost:8087
+    http:
+      port: 8087
+  datasources:
+    - jndi-name: jdbc/IRrecommendationDS
+      connection-url: jdbc:postgresql://localhost:5432/igloo
+      username: dbusers
+      password: postgres
+      max-pool-size: 20
+  config:
+    start-retry-delay-ms: 500
+    max-retry-delay-ms: 900000
+    etcd:
+      hosts: http://localhost:2379
+  discovery:
+    etcd:
+      hosts: http://localhost:2379
+  health:
+    checks:
+      disk-space-health-check:
+        threshold: 100000000
+      data-source-health-check:
+        jndi-name: jdbc/IRrecommendationDS
+  cors-filter:
+    servlet:
+      allow-origin: "*"
+  metrics:
+    web-instrumentation:
+      - name: recommendation-endpoint
+        url-pattern: /v1/recommendations/*
+  logs:
+    loggers:
+      - name: si.uni_lj.fri.rso.ir_recommendation.api.RecommendationResource
+        level: TRACE
+      - name: ''
+        level: INFO
+    config-file: '<?xml version="1.0" encoding="UTF-8"?>
+                  <Configuration name="orders">
+                      <Appenders>
+                          <Console name="console" target="SYSTEM_OUT">
+                              <PatternLayout pattern="%d %p %marker %m %X %ex %n"/>
+                          </Console>
+                          <Socket name="logstash" host="910488c6-cc7d-4dbe-8d14-f49c4f1ad80e-ls.logit.io" port="16772" protocol="tcp">
+                              <JSONLayout complete="false" compact="true" eventEol="true" charset="UTF-8" properties="true"/>
+                          </Socket>
+                      </Appenders>
+                      <Loggers>
+                          <!-- Default logger -->
+                          <Root level="all">
+                              <AppenderRef ref="console" level="trace"/>
+                              <AppenderRef ref="logstash" level="trace"/>
+                          </Root>
+                      </Loggers>
+                  </Configuration>'
+
+
+rest-config:
+  endpoint-enabled: true
+  healthy: true
+  load-intensity: 45
